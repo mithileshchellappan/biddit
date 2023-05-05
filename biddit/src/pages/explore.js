@@ -1,15 +1,23 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getArt } from './api/art'; // import your API function for getting art data
-
+import { getArt } from './api/art';
+import Router from 'next/router';
 const ExplorePage = () => {
   const [art, setArt] = useState([]);
+  const router = Router;
 
   useEffect(() => {
     const fetchArt = async () => {
-      const artData = await getArt(); // call your API function for getting art data
-      setArt(artData);
+      const token = localStorage.getItem('token')
+      if (token||token!=="null") {
+        const artData = await getArt(); 
+        console.log(artData);
+        setArt(artData);
+      }else{
+        router.push('/login')
+      }
+
     };
     fetchArt();
   }, []);
@@ -39,19 +47,20 @@ const ExplorePage = () => {
               <div className="block rounded-lg overflow-hidden shadow">
                 <div className="relative">
                   <Image
-                    src={artwork.imageUrl}
+                    src={artwork.artURL}
                     alt={artwork.title}
                     width={400}
                     height={400}
                     className="object-cover"
+                    unoptimized
                   />
-                  {artwork.bids.length > 0 && (
+                  {/* {artwork.bids.length > 0 && (
                     <div className="absolute inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center">
                       <p className="text-white text-lg font-bold">
                         Highest bid: ${artwork.bids[0].amount}
                       </p>
                     </div>
-                  )}
+                  )} */}
                 </div>
                 <div className="bg-white p-4">
                   <h3 className="text-lg font-bold">{artwork.title}</h3>

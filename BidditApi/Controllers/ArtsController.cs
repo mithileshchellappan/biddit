@@ -24,7 +24,7 @@ namespace BidditApi.Controllers
 
         // GET: api/Arts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Art>>> GetArts([FromQuery] bool promotedOnly = false)
+        public async Task<ActionResult<IEnumerable<Art>>> GetArts([FromQuery] bool promotedOnly = false,bool userImages = false)
         {
             IQueryable<Art> query = _context.Arts;
     
@@ -33,6 +33,11 @@ namespace BidditApi.Controllers
             {
                 
                 query = query.Where(a => a.IsPromoted);
+            }
+            if (userImages)
+            {
+            var UserId = HttpContext.Items["UserId"] as string;
+                query = query.Where(a => a.UserId == Int32.Parse(UserId));
             }
             var arts = await query.ToListAsync();
             if(arts == null)
@@ -94,13 +99,26 @@ namespace BidditApi.Controllers
         // POST: api/Arts
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult> PostArt(Art art)
+        public async Task<ActionResult> PostArt(ArtInputModel input)
         {
+   
+            Console.WriteLine("Inside");
           if (_context.Arts == null)
           {
               return Problem("Entity set 'ApplicationDbContext.Arts'  is null.");
           }
-
+            var UserId = HttpContext.Items["UserId"] as string;
+            Console.WriteLine("Here"+UserId);
+            Art art = new Art
+            {
+                ArtURL = input.ArtURL,
+                Title = input.Title,
+                Description = input.Description,
+                CreatedDate = DateTime.Now,
+                UserId = Int32.Parse(UserId)
+            };
+            
+            Console.WriteLine(art.UserId);
           _context.Arts.Add(art);
           await _context.SaveChangesAsync();
 
@@ -113,6 +131,8 @@ namespace BidditApi.Controllers
             return new string(Enumerable.Repeat(chars, length)
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
+
+
         [HttpPost("uploadFile")]
         public async Task<ActionResult<object>> UploadImage(IFormFile formFile)
         {
@@ -191,6 +211,13 @@ namespace BidditApi.Controllers
         private bool ArtExists(int id)
         {
             return (_context.Arts?.Any(e => e.ArtId == id)).GetValueOrDefault();
+        }
+
+        public class ArtInputModel
+        {
+            public string Title { get; set; }
+            public string Description { get; set; }
+            public string ArtURL { get; set; }
         }
     }
 }

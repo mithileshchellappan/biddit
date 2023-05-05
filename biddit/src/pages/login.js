@@ -12,18 +12,17 @@ const LoginPage = () => {
 
   const onSubmit = async (formData) => {
     try {
+      var result;
       if (isLogin) {
-        var result = await login(formData.username, formData.password); 
-        if(result){
-          setToken(result.jwtToken);
-        }
+         result = await login(formData.username, formData.password); 
+         
       } else {
-        var result = await signUp( formData.username,formData.password); 
-        if(result){
-          setToken(result.jwtToken);
-        }
+         result = await signUp( formData.username,formData.password); 
       }
-      router.push('/explore'); 
+      if(result){
+        console.log(result);
+        router.push('/explore'); 
+      }
     } catch (error) {
       console.error(error);
     }
@@ -32,14 +31,7 @@ const LoginPage = () => {
   return (
     <div className="flex items-center justify-center h-screen">
       <div className="flex flex-col md:flex-row w-full max-w-5xl p-8 md:p-16 bg-gray-100 rounded-lg shadow-lg">
-        <div className="md:w-1/2 order-2 md:order-1">
-          <Image
-            alt="carousel"
-            width={800}
-            height={600}
-            className="object-cover rounded-lg shadow-lg"
-          />
-        </div>
+
         <div className="md:w-1/2 order-1 md:order-2">
           <h2 className="text-2xl font-bold mb-4">{isLogin ? 'Login' : 'Sign Up'}</h2>
           <form onSubmit={handleSubmit(onSubmit)}>

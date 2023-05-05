@@ -14,17 +14,18 @@ async function login(username,password){
         })
     }).then(async res => {
         if(res.ok) {
+            console.log('inside');
             var resJson = await res.json();
             localStorage.setItem('token',resJson.jwtToken);
             return resJson
         }
-        throw new Error('Invalid Credentials')
+        return null
     }
     )
 
 }
 
-async function signUp(username,email,password){
+async function signUp(username,password){
     const url = `${BASE_URL}/Users`
     return fetch(url, {
         method: 'POST',
@@ -33,7 +34,6 @@ async function signUp(username,email,password){
         },
         body: JSON.stringify({
             userName: username,
-            email,
             password
         })
     }).then(async res => {
@@ -42,7 +42,8 @@ async function signUp(username,email,password){
             localStorage.setItem('token',resJson.jwtToken);
             return resJson
         }
-        throw new Error('Invalid Credentials')
+        console.log(await res.json())
+        return null
     }
     )
 }
