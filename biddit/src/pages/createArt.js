@@ -1,7 +1,7 @@
 import React, { useState,useEffect } from 'react';
-import { uploadImage,addArt } from './api/art';
+import { uploadImage,addArt,addBid } from './api/art';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
+import Link from 'next/link'
 
 // import axios from 'axios';
 
@@ -24,34 +24,39 @@ const CreateArt = () => {
   },[]);
 
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
     var obj = {
         title: title,
-        // MinBid: minBid,
-        // MaxBid: maxBid,
-        // BidExpiry: bidExpiry,
+        MinBid: minBid,
+        MaxBid: maxBid,
+        BidExpiry: bidExpiry,
         description: description
     }
 
-    uploadImage(image).then((data) => {
-        if(data.fileName){
-            obj.artURL = `https://localhost:7005/api/Arts/getFile?fileName=${data.fileName}`;
-            console.log(obj);
-            addArt(obj).then((data) => {
-                alert("Art Created Successfully");
-                window.location.href = "/explore";
-            }).catch((err) => {
-                console.log(err);
-                alert("Error in creating Art");
-            }
-            );
+    try {
+      const data = await uploadImage(image);
+      if (data.fileName) {
+        obj.artURL = `https://localhost:7005/api/Arts/getFile?fileName=${data.fileName}`;
+        console.log(obj);
+        const artData = await addArt(obj);
+        // console.log('full',);
+        if (artData) {
+          
+          const bidData = await addBid({...artData,...obj});
+          if (bidData) {
+            alert("Art Created Successfully");
+            console.log(bidData);
+            window.location.href = "/explore";
+          }
         }
-        
-        }).catch((err) => {
-        console.log(err);
-    });
+      }
+    } catch (err) {
+      console.log(err);
+      alert("Error in creating Art");
+    }
+    
   };
 
   const handleImageUpload = (e) => {

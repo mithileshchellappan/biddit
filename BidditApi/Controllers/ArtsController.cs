@@ -24,10 +24,22 @@ namespace BidditApi.Controllers
 
         // GET: api/Arts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Art>>> GetArts([FromQuery] bool promotedOnly = false,bool userImages = false)
+        public async Task<ActionResult<IEnumerable<dynamic>>> GetArts([FromQuery] bool promotedOnly = false,bool userImages = false)
         {
-            IQueryable<Art> query = _context.Arts;
-    
+            var query = from art in _context.Arts
+                                    join user in _context.Users on art.UserId equals user.UserId into users
+                                    from user in users.DefaultIfEmpty()
+                                    select new
+                                    {
+                                        art.ArtId,
+                                        art.Title,
+                                        art.UserId,
+                                        art.Description,
+                                        art.ArtURL,
+                                        art.IsPromoted,
+                                        UserName = user != null ? user.UserName : null
+                                    };
+
 
             if (promotedOnly)
             {
@@ -40,6 +52,7 @@ namespace BidditApi.Controllers
                 query = query.Where(a => a.UserId == Int32.Parse(UserId));
             }
             var arts = await query.ToListAsync();
+            Console.WriteLine(arts);
             if(arts == null)
             {
                 return NotFound();
@@ -219,5 +232,16 @@ namespace BidditApi.Controllers
             public string Description { get; set; }
             public string ArtURL { get; set; }
         }
+
+        //public class ArtUserModel
+        //{
+        //   public int ArtId { get; set; }
+        //   public string Title { get; set; }
+        //   public int UserId { get; set; }
+        //   public String Description { get; set; }
+        //   public String    ArtURL { get; set; }
+        //   public bool IsPromoted { get; set; }
+        //   public string UserName { get; set; }
+        //}
     }
 }

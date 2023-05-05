@@ -1,7 +1,12 @@
 const BASE_URL = 'https://localhost:7005/api'
 
-async function getArt(){
-    const url = `${BASE_URL}/Arts`
+async function getArt(artId=0,userImages=false){
+    var url;
+    if(artId!==0){
+      url = `${BASE_URL}/Arts/${artId}?userImages=${userImages}`
+    }else{
+      url = `${BASE_URL}/Arts?userImages=${userImages}`
+    }
     return fetch(url, {
         method: 'GET',
         headers: {
@@ -75,15 +80,35 @@ async function addArt(art){
             'Authorization': 'Bearer ' + localStorage.getItem('token') || ''
         },
         body: JSON.stringify(art),
-    }).then(res => {
-        if(res.ok) return res.json()
+    }).then(async res => {
+        if(res.ok) {var result = await res.json(); return result}
         throw new Error('Error adding art')
     }
     )
 }
 
+async function addBid(art){
+  const url = `${BASE_URL}/Bids`
+  console.log(art);
+  return fetch(url,{
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + localStorage.getItem('token') || ''
+  },
+  body: JSON.stringify(art),
+
+  }).then(async res => {
+    if(res.ok) {var result = await res.json(); return result}
+    throw new Error('Error adding bid')
+  })
+
+}
+
+
 module.exports = {
     getArt,
     uploadImage,
-    addArt
+    addArt,
+    addBid
 }

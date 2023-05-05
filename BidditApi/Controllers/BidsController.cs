@@ -86,15 +86,27 @@ namespace BidditApi.Controllers
         [HttpPost]
         public async Task<ActionResult<Bid>> PostBid(Bid bid)
         {
-          if (_context.Bids == null)
-          {
-              return Problem("Entity set 'ApplicationDbContext.Bids'  is null.");
-          }
+            if (_context.Bids == null)
+            {
+                return Problem("Entity set 'ApplicationDbContext.Bids'  is null.");
+            }
+
+            var art = await _context.Arts.FirstOrDefaultAsync(a => a.ArtId == bid.ArtId);
+            if (art == null)
+            {
+                return NotFound($"Art with id {bid.ArtId} not found.");
+            }
+
             _context.Bids.Add(bid);
+            await _context.SaveChangesAsync();
+
+            art.BidId = bid.BidId;
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetBid", new { id = bid.BidId }, bid);
         }
+
+
 
         // DELETE: api/Bids/5
         [HttpDelete("{id}")]

@@ -3,21 +3,22 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { getArt } from './api/art';
 import Router from 'next/router';
+import styles from './ExplorePage.module.css';
+
 const ExplorePage = () => {
   const [art, setArt] = useState([]);
   const router = Router;
 
   useEffect(() => {
     const fetchArt = async () => {
-      const token = localStorage.getItem('token')
-      if (token||token!=="null") {
-        const artData = await getArt(); 
+      const token = localStorage.getItem('token');
+      if (token || token !== 'null') {
+        const artData = await getArt();
         console.log(artData);
         setArt(artData);
-      }else{
-        router.push('/login')
+      } else {
+        router.push('/login');
       }
-
     };
     fetchArt();
   }, []);
@@ -41,30 +42,23 @@ const ExplorePage = () => {
       </nav>
       <div className="flex-grow p-8">
         <h2 className="text-2xl font-bold mb-8">Explore Art</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        <div className={styles.grid}>
           {art.map((artwork) => (
-            <Link key={artwork.id} href={`/art/${artwork.id}`}>
-              <div className="block rounded-lg overflow-hidden shadow">
-                <div className="relative">
+            <Link key={artwork.artId} href={`/art/${artwork.artId}`}>
+              <div className={styles.tile}>
+                <div className={styles.imageWrapper}>
                   <Image
                     src={artwork.artURL}
                     alt={artwork.title}
                     width={400}
                     height={400}
-                    className="object-cover"
+                    className={styles.image}
                     unoptimized
                   />
-                  {/* {artwork.bids.length > 0 && (
-                    <div className="absolute inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center">
-                      <p className="text-white text-lg font-bold">
-                        Highest bid: ${artwork.bids[0].amount}
-                      </p>
-                    </div>
-                  )} */}
                 </div>
-                <div className="bg-white p-4">
-                  <h3 className="text-lg font-bold">{artwork.title}</h3>
-                  <p className="text-gray-600">{artwork.artist}</p>
+                <div className={styles.tooltip}>
+                  <h3 className={styles.title}>{artwork.title}</h3>
+                  <p className={styles.userName}>by {artwork.userName}</p>
                 </div>
               </div>
             </Link>

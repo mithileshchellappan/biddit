@@ -22,7 +22,7 @@ namespace BidditApi.Utils
                  {
                   new Claim(ClaimTypes.Sid,user.UserId.ToString())
                  }),
-                    Expires = now.AddMinutes(60),
+                    Expires = now.AddHours(24),
                     SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(symmetricKey), SecurityAlgorithms.HmacSha256Signature)
                 };
