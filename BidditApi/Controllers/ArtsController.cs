@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using BidditApi.Data;
 using BidditApi.Models;
 using Microsoft.AspNetCore.StaticFiles;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace BidditApi.Controllers
 {
@@ -52,30 +53,39 @@ namespace BidditApi.Controllers
                 query = query.Where(a => a.UserId == Int32.Parse(UserId));
             }
             var arts = await query.ToListAsync();
-            Console.WriteLine(arts);
+            Console.WriteLine(arts[0].UserName);
             if(arts == null)
             {
                 return NotFound();
             }
             return arts;
         }
-
+        
         // GET: api/Arts/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Art>> GetArt(int id)
+        public async Task<ActionResult<dynamic>> GetArt(int id)
         {
-          if (_context.Arts == null)
-          {
-              return NotFound();
-          }
-            var art = await _context.Arts.FindAsync(id);
+            var query = from art in _context.Arts
+                        join user in _context.Users on art.UserId equals user.UserId into users
+                        from user in users.DefaultIfEmpty()
+                        join bid in _context.UserBids on art.BidId equals bid.BidId into bids
+                        from userBid in bids.DefaultIfEmpty()
+                        where art.ArtId == id
+                        group userBid by art into bidGroups
+                        select new
+                        {
+                            Art = bidGroups.Key,
+                            UserBids = bidGroups.ToList()
+                        };
 
-            if (art == null)
+            var result = await query.FirstOrDefaultAsync();
+
+            if (result == null)
             {
                 return NotFound();
             }
 
-            return art;
+            return result;
         }
 
         // PUT: api/Arts/5

@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getArt } from './api/art';
+import logoutUser  from './api/logoutUser';
 import Router from 'next/router';
 import styles from './ExplorePage.module.css';
+
 
 const ExplorePage = () => {
   const [art, setArt] = useState([]);
@@ -14,6 +16,10 @@ const ExplorePage = () => {
       const token = localStorage.getItem('token');
       if (token || token !== 'null') {
         const artData = await getArt();
+        if(!artData){
+          logoutUser()
+          router.push('/login');
+        }
         console.log(artData);
         setArt(artData);
       } else {
@@ -44,7 +50,7 @@ const ExplorePage = () => {
         <h2 className="text-2xl font-bold mb-8">Explore Art</h2>
         <div className={styles.grid}>
           {art.map((artwork) => (
-            <Link key={artwork.artId} href={`/art/${artwork.artId}`}>
+            <Link key={artwork.artId} href={`/art/${artwork.artId}`} onClick={()=>{router.push(`/art/${artwork/artId}`)}}>
               <div className={styles.tile}>
                 <div className={styles.imageWrapper}>
                   <Image

@@ -3,8 +3,10 @@ const BASE_URL = 'https://localhost:7005/api'
 async function getArt(artId=0,userImages=false){
     var url;
     if(artId!==0){
+      console.log('inside');
       url = `${BASE_URL}/Arts/${artId}?userImages=${userImages}`
     }else{
+      console.log('inside here');
       url = `${BASE_URL}/Arts?userImages=${userImages}`
     }
     return fetch(url, {
@@ -15,8 +17,12 @@ async function getArt(artId=0,userImages=false){
         },
     }).then(res => {
         if(res.ok) return res.json()
-        if(res.status===401)
-        throw new Error('Error fetching art')
+        if(res.status===401){
+          return false
+        }else{
+          throw new Error('Error getting art')
+        }
+        
     }
     )
 
