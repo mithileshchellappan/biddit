@@ -60,41 +60,41 @@ app.UseAuthorization();
 //});
 
 
-//app.Use(async (context, next) =>
-//{
-//    Console.WriteLine(context.Request.Path);
-//    Console.WriteLine("eval"+ !context.Request.Path.StartsWithSegments("/api/Arts/getFile"));
+app.Use(async (context, next) =>
+{
+    Console.WriteLine(context.Request.Path);
+    Console.WriteLine("eval" + !context.Request.Path.StartsWithSegments("/api/Arts/getFile"));
 
-//    if (!context.Request.Path.StartsWithSegments("/api/Users")&&!context.Request.Path.StartsWithSegments("/api/Arts/getFile"))
-//    {
-//        Console.WriteLine("Inside");
-//        if (context.Request.Headers.ContainsKey("Authorization"))
-//        {
-//            var bearerToken = context.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-//            var (isValid, value) = JWTHasher.ValidateToken(bearerToken);
-//            if (isValid)
-//            {
-//                context.Items["UserId"] = value;
-//                Console.WriteLine(value);
+    if (!context.Request.Path.StartsWithSegments("/api/Users") && !context.Request.Path.StartsWithSegments("/api/Arts/getFile"))
+    {
+        Console.WriteLine("Inside");
+        if (context.Request.Headers.ContainsKey("Authorization"))
+        {
+            var bearerToken = context.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var (isValid, value) = JWTHasher.ValidateToken(bearerToken);
+            if (isValid)
+            {
+                context.Items["UserId"] = value;
+                Console.WriteLine(value);
 
-//            }
-//            else
-//            {
-//                context.Response.StatusCode = 401;
-//                await context.Response.WriteAsync("Invalid");
-//                return;
-//            }
-//        }
-//        else
-//        {
-//            context.Response.StatusCode = 401;
-//            await context.Response.WriteAsync("Invalid");
-//            return;
-//        }
-//    }
+            }
+            else
+            {
+                context.Response.StatusCode = 401;
+                await context.Response.WriteAsync("Invalid");
+                return;
+            }
+        }
+        else
+        {
+            context.Response.StatusCode = 401;
+            await context.Response.WriteAsync("Invalid");
+            return;
+        }
+    }
 
-//    await next.Invoke();
-//});
+    await next.Invoke();
+});
 
 
 

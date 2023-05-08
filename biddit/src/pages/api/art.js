@@ -28,6 +28,26 @@ async function getArt(artId=0,userImages=false){
 
 }
 
+async function addUserBid(bidObj){
+  const url = `${BASE_URL}/UserBids`
+  console.log(bidObj);
+  return fetch(url,{
+    method:'POST',
+    headers:{
+      'Content-Type': 'application/json',
+      'Authorization':'Bearer ' + localStorage.getItem('token') || '',
+    },
+    body:JSON.stringify(bidObj)
+  }).then(async res=>{
+    var jsonRes = await res.json();
+    if(res.ok){
+      console.log(`added bid`);
+      return jsonRes
+    }
+    throw new Error(`Error adding bid`)
+  })
+}
+
 async function uploadImage(image) {
     const url = `${BASE_URL}/Arts/uploadFile`;
     const formData = new FormData();
@@ -116,5 +136,6 @@ module.exports = {
     getArt,
     uploadImage,
     addArt,
-    addBid
+    addBid,
+    addUserBid
 }

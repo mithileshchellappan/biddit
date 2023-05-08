@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { getArt } from '../api/art';
+import { getArt, addUserBid } from '../api/art';
 import Link from 'next/link';
 
 export default function ArtView() {
@@ -15,13 +15,27 @@ export default function ArtView() {
     setNewBid(event.target.value);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     setCurrentBid(newBid);
-    if (newBid <= currentBid) {
+    if (newBid <= currentBid.bidAmount) {
+      console.log(newBid,currentBid.bidAmount);
       alert('Your bid must be higher than the current bid!');
       setCurrentBid(currentBid);
       return;
+    }else{
+      var bidObj = {
+        BidId :art.bidId,
+        BidAmount : parseInt(newBid)
+      }
+
+     var res =  await addUserBid(bidObj)
+     if(res){
+      router.reload();
+     }else{
+      alert('Something went wrong while adding your bid')
+     }
+
     }
     setNewBid(currentBid);
   };
@@ -34,6 +48,8 @@ export default function ArtView() {
         if (token || token !== 'null') {
           const artData = await getArt(artId);
           console.log(artData)
+          artData.art.userName = artData.userName
+          artData.art.BidCount = artData.userBids.length
           setArt(artData.art);
           setBidData(artData.userBids)
           let highestBid = {bidAmount: 0, userId: 0};   
@@ -86,7 +102,8 @@ export default function ArtView() {
         <h1 className="text-5xl font-bold mb-4">{art.title}</h1>
         <p className="text-lg mb-4">Description: {art.description}</p>
         <p className="text-lg mb-4">Owner: {art.userName}</p>
-        {currentBid.userId!==0?<p className="text-lg mb-4">Current highest bid: <b>${currentBid.bidAmount}</b> by <i>user {currentBid.bidId}</i></p>:<p className="text-lg mb-4">No bids yet</p>}
+        {currentBid.userId!==0?<p className="text-lg mb-4">Current highest bid: <b>${currentBid.bidAmount}</b> by <i>user {currentBid.userId}</i></p>:<p className="text-lg mb-4">No bids yet</p>}
+        <p>Total Bids: {art.BidCount}</p>
         <form onSubmit={handleSubmit}>
           <label htmlFor="bidAmount" className="block text-lg mb-2">
             Enter your bid:

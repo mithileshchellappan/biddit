@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BidditApi.Data;
 using BidditApi.Models;
+using Newtonsoft.Json.Linq;
 
 namespace BidditApi.Controllers
 {
@@ -84,12 +85,34 @@ namespace BidditApi.Controllers
         // POST: api/UserBids
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<UserBids>> PostUserBids(UserBids userBids)
+        public async Task<ActionResult<UserBids>> PostUserBids(UserBidsCustom bid)
         {
           if (_context.UserBids == null)
           {
               return Problem("Entity set 'ApplicationDbContext.UserBids'  is null.");
           }
+
+
+            var bidExists = _context.Bids.Find(bid.BidId);
+
+            if(bidExists == null)
+            {
+                return BadRequest("Bid Doesnt Exist");
+            }
+
+            var UserId = HttpContext.Items["UserId"] as string;
+            if(UserId == null)
+            {
+                return Unauthorized();
+            }
+            var userBids = new UserBids
+            {
+                UserId = Int32.Parse(UserId),
+                BidId = bid.BidId,
+                BidAmount = bid.BidAmount
+            };
+
+
             _context.UserBids.Add(userBids);
             await _context.SaveChangesAsync();
 
@@ -120,5 +143,11 @@ namespace BidditApi.Controllers
         {
             return (_context.UserBids?.Any(e => e.Id == id)).GetValueOrDefault();
         }
+
+        public class UserBidsCustom
+        {
+            public int BidId { get; set; }
+            public int BidAmount { get; set; }
+        } 
     }
 }

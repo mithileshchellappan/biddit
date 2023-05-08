@@ -38,6 +38,8 @@ namespace BidditApi.Controllers
                                         art.Description,
                                         art.ArtURL,
                                         art.IsPromoted,
+                                        art.BidId,
+                                        BidCount = _context.UserBids.Count(bid => bid.BidId == art.BidId),
                                         UserName = user != null ? user.UserName : null
                                     };
 
@@ -52,7 +54,11 @@ namespace BidditApi.Controllers
             var UserId = HttpContext.Items["UserId"] as string;
                 query = query.Where(a => a.UserId == Int32.Parse(UserId));
             }
+
+            
+
             var arts = await query.ToListAsync();
+
             Console.WriteLine(arts[0].UserName);
             if(arts == null)
             {
@@ -71,21 +77,48 @@ namespace BidditApi.Controllers
                         join bid in _context.UserBids on art.BidId equals bid.BidId into bids
                         from userBid in bids.DefaultIfEmpty()
                         where art.ArtId == id
+                        where user.UserId == art.UserId
                         group userBid by art into bidGroups
                         select new
                         {
                             Art = bidGroups.Key,
-                            UserBids = bidGroups.ToList()
+                            UserBids = bidGroups.ToList(),
+                            userName = ""
                         };
 
+
+
             var result = await query.FirstOrDefaultAsync();
+
+            var userObj = await _context.Users.FindAsync(result.Art.UserId);
+
+            var updResult = new
+            {
+                Art = result.Art,
+                UserBids = result.UserBids,
+                userName = userObj.UserName ?? ""
+            };
+    
+
+            //var query = from art in _context.Arts
+            //            join user in _context.Users on art.UserId equals user.UserId
+            //            join bid in _context.UserBids on art.BidId equals bid.BidId
+            //            where art.ArtId == id
+            //            select new
+            //            {
+            //                Art = art,
+            //                user = user.UserName,
+            //                Bid = bid,
+            //            };
+            //Console.WriteLine("UserId"+result.Art.UserId);
+
 
             if (result == null)
             {
                 return NotFound();
             }
 
-            return result;
+            return updResult;
         }
 
         // PUT: api/Arts/5
